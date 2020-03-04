@@ -47,3 +47,14 @@ type Amortization struct {
 	MonthlyPaymentOnInterest  float64
 	RemainingPrincipal        float64
 }
+
+type AmortizationIterator struct {
+}
+
+func NewAmortizationIterator(
+	principal float64,
+	interestPercent float64,
+	termInMonths int,
+) *AmortizationIterator {
+	return &AmortizationIterator{}
+}

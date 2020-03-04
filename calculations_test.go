@@ -41,3 +41,10 @@ func (this *CalculationFixture) TestAmortizationListing2() {
 		start = start.AddDate(0, 1, 0)
 	}
 }
+
+func (this *CalculationFixture) TestAmortizationIterator() {
+	iterator := NewAmortizationIterator(100000.0, 6.0, 360)
+	this.So(iterator, should.NotBeNil)
+
+	// TODO: scan through each payment
+}
