@@ -1,11 +1,9 @@
 package mortgauge
 
-import (
-	"math"
-)
+import "math"
 
 func CalculateMonthlyPayment(
-	principal float64,
+	principal,
 	interestPercent float64,
 	termInMonths int,
 ) float64 {
@@ -18,24 +16,13 @@ func CalculateMonthlyPayment(
 }
 
 func AmortizationListing(
-	principal float64,
+	principal,
 	interestPercent float64,
 	termInMonths int,
 ) (listing []Amortization) {
-	payment := CalculateMonthlyPayment(principal, interestPercent, termInMonths)
-
-	for principal > 0 {
-		rate := (interestPercent / 100.0) / 12
-		paymentOnInterest := principal * rate
-		paymentOnPrincipal := payment - paymentOnInterest
-		listing = append(listing, Amortization{
-			StartingPrincipal:         principal,
-			MonthlyPaymentOnPrincipal: paymentOnPrincipal,
-			MonthlyPaymentOnInterest:  paymentOnInterest,
-			RemainingPrincipal:        principal - paymentOnPrincipal,
-		})
-
-		principal -= paymentOnPrincipal
+	iterator := NewAmortizationIterator(principal, interestPercent, termInMonths)
+	for iterator.NonZeroBalance() {
+		listing = append(listing, iterator.Next(0))
 	}
 	return listing
 }
@@ -49,12 +36,44 @@ type Amortization struct {
 }
 
 type AmortizationIterator struct {
+	principal       float64
+	interestPercent float64
+	termInMonths    int
+	payment         float64
 }
 
 func NewAmortizationIterator(
-	principal float64,
+	principal,
 	interestPercent float64,
 	termInMonths int,
 ) *AmortizationIterator {
-	return &AmortizationIterator{}
+	payment := CalculateMonthlyPayment(principal, interestPercent, termInMonths)
+	return &AmortizationIterator{
+		principal:       principal,
+		interestPercent: interestPercent,
+		termInMonths:    termInMonths,
+		payment:         payment,
+	}
+}
+
+func (this *AmortizationIterator) NonZeroBalance() bool {
+	return this.principal > 0
+}
+
+func (this *AmortizationIterator) Next(extraPayment float64) Amortization {
+	rate := (this.interestPercent / 100.0) / 12
+	paymentOnInterest := this.principal * rate
+	paymentOnPrincipal := (this.payment - paymentOnInterest) + extraPayment
+	defer this.applyPayment(paymentOnPrincipal)
+
+	return Amortization{
+		StartingPrincipal:         this.principal,
+		MonthlyPaymentOnPrincipal: paymentOnPrincipal,
+		MonthlyPaymentOnInterest:  paymentOnInterest,
+		RemainingPrincipal:        this.principal - paymentOnPrincipal,
+	}
+}
+
+func (this *AmortizationIterator) applyPayment(paymentOnPrincipal float64) {
+	this.principal -= paymentOnPrincipal
 }
