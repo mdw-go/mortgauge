@@ -76,7 +76,10 @@ func parseExtraPayments() map[time.Time]float64 {
 	if err != nil {
 		log.Panic(err)
 	}
-	for _, record := range records {
+	for i, record := range records {
+		if i == 0  { // header
+			continue
+		}
 		rawDate := record[0]
 		rawPrincipal := record[1]
 
