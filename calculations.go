@@ -70,6 +70,7 @@ func (this *AmortizationIterator) Next(extraPayment float64) Amortization {
 		StartingPrincipal:         this.principal,
 		MonthlyPaymentOnPrincipal: paymentOnPrincipal,
 		MonthlyPaymentOnInterest:  paymentOnInterest,
+		ExtraPaymentOnPrincipal:   extraPayment,
 		RemainingPrincipal:        this.principal - paymentOnPrincipal,
 	}
 }
