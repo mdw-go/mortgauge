@@ -101,11 +101,11 @@ func parseConfig() (config Config) {
 	flags.IntVar(&config.TermInMonths, "term", 180, "The term, in months.")
 	flags.StringVar(&config.start, "start", "2020-01", "The month of the first payment ('YYYY-MM').")
 	flags.Float64Var(&config.Extra, "extra", 0,
-		"The extra payment on principle to apply each month, starting on -extra-from. " +
-		"If left zero, no recurring extra payments are applied.")
+		"The extra payment on principle to apply each month, starting on -extra-from. "+
+			"If left zero, no recurring extra payments are applied.")
 	flags.StringVar(&config.extraFrom, "extra-from", "",
-		"The month of the first recurring extra payment, specified by -extra. " +
-		"If left blank, no recurring extra payments are applied.")
+		"The month of the first recurring extra payment, specified by -extra. "+
+			"If left blank, no recurring extra payments are applied.")
 
 	err := flags.Parse(os.Args[1:])
 	if err != nil {
