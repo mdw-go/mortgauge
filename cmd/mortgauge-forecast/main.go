@@ -39,7 +39,7 @@ func main() {
 
 	for ; iterator.NonZeroBalance(); term++ {
 		extraPayment := extra[date]
-		if !config.ExtraFrom.Before(date) {
+		if !config.ExtraFrom.After(date) {
 			extraPayment += config.Extra
 		}
 		state := iterator.Next(extraPayment)
