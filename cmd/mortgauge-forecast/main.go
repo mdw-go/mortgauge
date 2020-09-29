@@ -27,34 +27,38 @@ func main() {
 	writer := csv.NewWriter(os.Stdout)
 	writer.Comma = '\t'
 
-	_ = writer.Write([]string{
-		"Date",
-		"Term",
-		"Starting Balance",
-		"Toward Monthly Interest",
-		"Toward Monthly Principal",
-		"Extra Principal",
-		"Remaining Balance",
-	})
-
 	for ; iterator.NonZeroBalance(); term++ {
 		extraPayment := extra[date]
 		if !config.ExtraFrom.After(date) {
 			extraPayment += config.Extra
 		}
 		state := iterator.Next(extraPayment)
-		_ = writer.Write([]string{
-			date.Format("2006-01"),
+		record := []string{
+			fmt.Sprintf("%10.2f", state.StartingPrincipal),
+			fmt.Sprintf("%10.2f", state.MonthlyPaymentOnInterest),
+			fmt.Sprintf("%10.2f", state.MonthlyPaymentOnPrincipal-extraPayment),
+			fmt.Sprintf("%10.2f", state.ExtraPaymentOnPrincipal),
+			fmt.Sprintf("%10.2f", state.RemainingPrincipal),
 			fmt.Sprint(term + 1),
-			fmt.Sprintf("%.2f", state.StartingPrincipal),
-			fmt.Sprintf("%.2f", state.MonthlyPaymentOnInterest),
-			fmt.Sprintf("%.2f", state.MonthlyPaymentOnPrincipal-extraPayment),
-			fmt.Sprintf("%.2f", state.ExtraPaymentOnPrincipal),
-			fmt.Sprintf("%.2f", state.RemainingPrincipal),
-		})
+			date.Format("2006-01"),
+		}
+		if date.Year() == time.Now().Year() && date.Month() == time.Now().Month() {
+			record = append(record, "<<<")
+		}
+		_ = writer.Write(record)
 		totalExtra += extraPayment
 		date = date.AddDate(0, 1, 0)
 	}
+
+	_ = writer.Write([]string{
+		fmt.Sprintf("%10s", "Starting"),
+		fmt.Sprintf("%10s", "Interest"),
+		fmt.Sprintf("%10s", "Principal"),
+		fmt.Sprintf("%10s", "Extra"),
+		fmt.Sprintf("%10s", "Remaining"),
+		"Term",
+		"Date",
+	})
 
 	writer.Flush()
 
