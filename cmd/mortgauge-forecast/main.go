@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/mdwhatcott/mortgauge"
@@ -23,9 +24,12 @@ func main() {
 	)
 	date := config.Start
 	term := 0
+	interest := 0.0
 
 	writer := csv.NewWriter(os.Stdout)
 	writer.Comma = '\t'
+
+	columnNames(writer)
 
 	for ; iterator.NonZeroBalance(); term++ {
 		extraPayment := extra[date]
@@ -33,12 +37,13 @@ func main() {
 			extraPayment += config.Extra
 		}
 		state := iterator.Next(extraPayment)
+		interest += state.MonthlyPaymentOnInterest
 		record := []string{
-			fmt.Sprintf("%10.2f", state.StartingPrincipal),
-			fmt.Sprintf("%10.2f", state.MonthlyPaymentOnInterest),
-			fmt.Sprintf("%10.2f", state.MonthlyPaymentOnPrincipal-extraPayment),
-			fmt.Sprintf("%10.2f", state.ExtraPaymentOnPrincipal),
-			fmt.Sprintf("%10.2f", state.RemainingPrincipal),
+			pad(formatUSD(state.StartingPrincipal)),
+			pad(formatUSD(state.MonthlyPaymentOnInterest)),
+			pad(formatUSD(state.MonthlyPaymentOnPrincipal - extraPayment)),
+			pad(formatUSD(state.ExtraPaymentOnPrincipal)),
+			pad(formatUSD(state.RemainingPrincipal)),
 			fmt.Sprint(term + 1),
 			date.Format("2006-01"),
 		}
@@ -50,6 +55,23 @@ func main() {
 		date = date.AddDate(0, 1, 0)
 	}
 
+	columnNames(writer)
+
+	writer.Flush()
+
+	termDiff := config.TermInMonths - term - 1
+	log.Printf(
+		"Extra payments applied (%.2f) shortened term of loan by %d years and %d months, from %s to %s. A total of %s interest was paid.",
+		totalExtra,
+		termDiff/12,
+		termDiff%12,
+		config.Start.AddDate(0, config.TermInMonths, 0).Format("2006-01"),
+		config.Start.AddDate(0, term-1, 0).Format("2006-01"),
+		formatUSD(interest),
+	)
+}
+
+func columnNames(writer *csv.Writer) {
 	_ = writer.Write([]string{
 		fmt.Sprintf("%10s", "Starting"),
 		fmt.Sprintf("%10s", "Interest"),
@@ -59,18 +81,18 @@ func main() {
 		"Term",
 		"Date",
 	})
+}
 
-	writer.Flush()
-
-	termDiff := config.TermInMonths - term - 1
-	log.Printf(
-		"Extra payments applied (%.2f) shortened term of loan by %d years and %d months, from %s to %s.",
-		totalExtra,
-		termDiff/12,
-		termDiff%12,
-		config.Start.AddDate(0, config.TermInMonths, 0).Format("2006-01"),
-		config.Start.AddDate(0, term-1, 0).Format("2006-01"),
-	)
+func pad(value string) string {
+	return fmt.Sprintf("%12s", value)
+}
+func formatUSD(amount float64) string {
+	decimal := fmt.Sprintf("%.2f", amount)
+	dot := strings.Index(decimal, ".")
+	if dot > 3 {
+		decimal = decimal[:dot-3] + "," + decimal[dot-3:]
+	}
+	return "$" + decimal
 }
 
 func parseExtraPayments() map[time.Time]float64 {
