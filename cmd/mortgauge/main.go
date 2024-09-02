@@ -18,8 +18,21 @@ func main() {
 		config.TermInMonths,
 	)
 	date := config.Start
+	fmt.Println("Principal:", config.Principal)
+	fmt.Println("Interest:", config.Interest)
+	fmt.Println("TermInMonths:", config.TermInMonths)
+	fmt.Println("Start:", date)
+	fmt.Println("Monthly Payment:", iterator.MonthlyPayment())
+	fmt.Printf("Date      Months    Balance   Principal Interest\n")
+	fmt.Printf("================================================\n")
 	for i := 0; iterator.NonZeroBalance(); i++ {
-		fmt.Println(date.Format("2006-01"), i+1, iterator.Next(config.ExtraPayment))
+		step := iterator.Next(config.ExtraPayment)
+		principal := fmt.Sprintf("%.2f", step.MonthlyPaymentOnPrincipal)
+		interest := fmt.Sprintf("%.2f", step.MonthlyPaymentOnInterest)
+		remaining := fmt.Sprintf("%.2f", step.RemainingPrincipal)
+		fmt.Printf("%-9s %-9d %-9s %-9s %-9s\n",
+			date.Format("2006-01"), config.TermInMonths-i, remaining, principal, interest,
+		)
 		date = date.AddDate(0, 1, 0)
 	}
 }
@@ -29,7 +42,7 @@ func parseConfig() (config Config) {
 
 	flags.Float64Var(&config.Principal, "principal", 100_000, "The original principal.")
 	flags.Float64Var(&config.Interest, "interest", 6.0, "The interest rate, in percent.")
-	flags.IntVar(&config.TermInMonths, "term", 180, "The term, in months.")
+	flags.IntVar(&config.TermInMonths, "term", 180, "The term, in months. 180=15y; 360=30y;")
 	flags.StringVar(&config.start, "start", "2020-01", "The month of the first payment ('YYYY-MM').")
 	flags.Float64Var(&config.ExtraPayment, "extra", 0, "The extra principal to pay each month.")
 

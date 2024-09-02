@@ -56,6 +56,10 @@ func NewAmortizationIterator(
 	}
 }
 
+func (this *AmortizationIterator) MonthlyPayment() float64 {
+	return this.payment
+}
+
 func (this *AmortizationIterator) NonZeroBalance() bool {
 	return this.principal > 0
 }
