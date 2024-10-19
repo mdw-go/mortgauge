@@ -18,19 +18,18 @@ func main() {
 		config.TermInMonths,
 	)
 	date := config.Start
-	fmt.Println("Principal:", config.Principal)
-	fmt.Println("Interest:", config.Interest)
-	fmt.Println("TermInMonths:", config.TermInMonths)
-	fmt.Println("Start:", date)
-	fmt.Println("Monthly Payment:", iterator.MonthlyPayment())
-	fmt.Printf("Date      Months    Balance   Principal Interest\n")
-	fmt.Printf("================================================\n")
+	fmt.Printf("Principal:       %s\n", mortgauge.FormatUSD(config.Principal))
+	fmt.Printf("TermInMonths:    %d (%d years)\n", config.TermInMonths, config.TermInMonths/12)
+	fmt.Printf("Interest:        %%%.2f\n", config.Interest)
+	fmt.Printf("Monthly Payment: %s\n", mortgauge.FormatUSD(iterator.MonthlyPayment()))
+	fmt.Printf("Date        Months    Balance     Principal   Interest\n")
+	fmt.Printf("======================================================\n")
 	for i := 0; iterator.NonZeroBalance(); i++ {
 		step := iterator.Next(config.ExtraPayment)
-		principal := fmt.Sprintf("%.2f", step.MonthlyPaymentOnPrincipal)
-		interest := fmt.Sprintf("%.2f", step.MonthlyPaymentOnInterest)
-		remaining := fmt.Sprintf("%.2f", step.RemainingPrincipal)
-		fmt.Printf("%-9s %-9d %-9s %-9s %-9s\n",
+		principal := fmt.Sprintf("%s", mortgauge.FormatUSD(step.MonthlyPaymentOnPrincipal))
+		interest := fmt.Sprintf("%s", mortgauge.FormatUSD(step.MonthlyPaymentOnInterest))
+		remaining := fmt.Sprintf("%s", mortgauge.FormatUSD(step.RemainingPrincipal))
+		fmt.Printf("%-11s %-9d %-11s %-11s %-11s\n",
 			date.Format("2006-01"), config.TermInMonths-i, remaining, principal, interest,
 		)
 		date = date.AddDate(0, 1, 0)
@@ -68,5 +67,3 @@ type Config struct {
 	start        string
 	ExtraPayment float64
 }
-
-// TODO: how to indicate extra payment (one-time, ongoing from <date>, etc...)
