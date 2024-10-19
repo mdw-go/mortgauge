@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mdwhatcott/mortgauge"
+	"github.com/mdw-go/mortgauge"
 )
 
 func main() {
