@@ -24,8 +24,10 @@ func main() {
 	fmt.Printf("Monthly Payment: %s\n", mortgauge.FormatUSD(iterator.MonthlyPayment()))
 	fmt.Printf("Date        Months    Balance     Principal   Interest\n")
 	fmt.Printf("======================================================\n")
+	totalInterestPaid := 0.0
 	for i := 0; iterator.NonZeroBalance(); i++ {
 		step := iterator.Next(config.ExtraPayment)
+		totalInterestPaid += step.MonthlyPaymentOnInterest
 		principal := fmt.Sprintf("%s", mortgauge.FormatUSD(step.MonthlyPaymentOnPrincipal))
 		interest := fmt.Sprintf("%s", mortgauge.FormatUSD(step.MonthlyPaymentOnInterest))
 		remaining := fmt.Sprintf("%s", mortgauge.FormatUSD(step.RemainingPrincipal))
@@ -34,6 +36,8 @@ func main() {
 		)
 		date = date.AddDate(0, 1, 0)
 	}
+	fmt.Println()
+	fmt.Printf("Total interest paid: %s\n", mortgauge.FormatUSD(totalInterestPaid))
 }
 
 func parseConfig() (config Config) {
