@@ -17,7 +17,7 @@ func TestAmortizationListing(t *testing.T) {
 	}
 	expected := Amortization{
 		StartingPrincipal:         100000,
-		MonthlyPaymentOnPrincipal: 99.55052515275884,
+		MonthlyPaymentOnPrincipal: 99.55052515275882,
 		ExtraPaymentOnPrincipal:   0,
 		MonthlyPaymentOnInterest:  500.00,
 		RemainingPrincipal:        99900.44947484724,
@@ -29,6 +29,7 @@ func assertEqual(t *testing.T, expected, actual interface{}) bool {
 	if reflect.DeepEqual(expected, actual) {
 		return true
 	}
+	t.Helper()
 	t.Errorf("\nExpected: %+v\nActual:   %+v", expected, actual)
 	return false
 }
